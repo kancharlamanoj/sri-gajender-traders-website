@@ -3,10 +3,12 @@ import { AnimatePresence, motion } from 'motion/react';
 import {
   ArrowUpRight,
   Compass,
+  LayoutDashboard,
   Menu,
   MessageCircle,
   Search,
   ShieldCheck,
+  UserCheck,
   X,
 } from 'lucide-react';
 import { getLiveStoreStatus, STORE_INFO } from '../../data/catalogData';
@@ -20,13 +22,13 @@ interface NavbarProps {
   onOpenQuickSearch: () => void;
 }
 
-const NAV_ITEMS: { id: PageRoute; label: string; index: string }[] = [
-  { id: 'home', label: 'Flagship', index: '01' },
-  { id: 'catalogue', label: 'Collection', index: '02' },
-  { id: 'brands', label: 'Brands', index: '03' },
-  { id: 'wholesale', label: 'Wholesale', index: '04' },
-  { id: 'about', label: 'Atelier', index: '05' },
-  { id: 'contact', label: 'Contact Us', index: '06' },
+const NAV_ITEMS: { id: PageRoute; label: string }[] = [
+  { id: 'home', label: 'Flagship' },
+  { id: 'catalogue', label: 'Collection' },
+  { id: 'brands', label: 'Brands' },
+  { id: 'wholesale', label: 'Wholesale' },
+  { id: 'about', label: 'About Us' },
+  { id: 'contact', label: 'Contact Us' },
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -91,8 +93,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </button>
 
-            {/* Center Compact Navigation */}
-            <nav aria-label="Primary Navigation" className="hidden lg:flex items-center gap-1">
+            {/* Center Modern Clean Navigation (No Numbers) */}
+            <nav aria-label="Primary Navigation" className="hidden lg:flex items-center gap-1.5">
               {NAV_ITEMS.map((item) => {
                 const active =
                   currentPage === item.id ||
@@ -102,46 +104,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                     key={item.id}
                     type="button"
                     onClick={() => onNavigate({ page: item.id })}
-                    className={`relative rounded-full px-3.5 py-1.5 text-xs font-medium tracking-[0.04em] transition-colors ${
+                    className={`relative rounded-full px-4 py-2 text-xs font-semibold tracking-wide transition-all ${
                       active
-                        ? 'text-[#303033]'
-                        : 'text-[#777271] hover:text-[#303033]'
+                        ? 'text-white bg-[#B8202A] shadow-xs'
+                        : 'text-[#303033] hover:text-[#B8202A] hover:bg-[#F5F3F2]'
                     }`}
                   >
-                    {active && (
-                      <motion.span
-                        layoutId="nav-pill-active"
-                        transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-                        className="absolute inset-0 -z-10 rounded-full bg-[#F5F3F2] border border-[#B8202A]/35"
-                      />
-                    )}
-                    <span className="font-tech text-[9px] text-[#777271] mr-1">
-                      {item.index}
-                    </span>
                     {item.label}
                   </button>
                 );
               })}
             </nav>
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => onNavigate({ page: 'contact' })}
-                title={storeStatus.sublabel}
-                className="hidden xl:inline-flex items-center gap-2 rounded-full border border-[#303033]/10 bg-[#FDFDFD]/90 px-3 py-1.5 text-[11px] text-[#303033] transition hover:border-[#B8202A]/60"
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    storeStatus.isOpen ? 'bg-[#B8202A] animate-pulse' : 'bg-[#B8202A]'
-                  }`}
-                />
-                <span className="font-tech text-[10px] tracking-[0.08em]">
-                  {storeStatus.isOpen ? 'OPEN · TIRUPATI' : 'NEHRU NAGAR'}
-                </span>
-              </button>
-
+            {/* Right Actions: Search, Admin Portal Pill, Price Concierge */}
+            <div className="flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={onOpenQuickSearch}
@@ -152,24 +128,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Search className="h-3.5 w-3.5" />
               </button>
 
+              {/* Dedicated Admin Profile & Management Button */}
               <button
                 type="button"
                 onClick={() => onNavigate({ page: 'admin' })}
                 aria-label="Admin Operations Console"
-                title="Admin Operations Console"
-                className={`flex h-9 w-9 items-center justify-center rounded-full border transition ${
+                title="Admin Management Console"
+                className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold border transition shadow-xs ${
                   currentPage === 'admin'
-                    ? 'border-[#B8202A] bg-[#B8202A] text-white shadow-sm'
-                    : 'border-[#303033]/12 bg-[#FDFDFD] text-[#303033] hover:border-[#B8202A] hover:bg-[#F5F3F2]'
+                    ? 'border-[#B8202A] bg-[#B8202A] text-white shadow-md shadow-[#B8202A]/20'
+                    : 'border-[#303033]/15 bg-white text-[#303033] hover:border-[#B8202A] hover:text-[#B8202A] hover:bg-[#F5F3F2]'
                 }`}
               >
-                <ShieldCheck className="h-4 w-4" />
+                <div className="w-5 h-5 rounded-full bg-red-100 text-red-700 flex items-center justify-center text-[10px] font-bold">
+                  <ShieldCheck className="h-3.5 w-3.5 text-[#B8202A]" />
+                </div>
+                <span>Admin</span>
               </button>
 
               <MagneticButton
                 onClick={() => onOpenConcierge('retail')}
                 cursorLabel="ENQUIRE"
-                className="hidden sm:inline-flex items-center gap-2 rounded-full bg-[#B8202A] px-4 py-2 text-xs font-medium text-[#FDFDFD] shadow-xs transition hover:bg-[#961923]"
+                className="hidden sm:inline-flex items-center gap-2 rounded-full bg-[#303033] hover:bg-[#B8202A] px-4 py-2 text-xs font-medium text-[#FDFDFD] shadow-xs transition"
               >
                 <MessageCircle className="h-3.5 w-3.5 text-[#F5F3F2]" />
                 <span>Price Concierge</span>
@@ -201,7 +181,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <div className="space-y-2">
               <div className="font-tech text-[10px] uppercase tracking-[0.22em] text-[#777271] mb-4">
-                Navigation Directory // 01–06
+                Store Navigation
               </div>
               {NAV_ITEMS.map((item, i) => (
                 <motion.button
@@ -211,30 +191,35 @@ export const Navbar: React.FC<NavbarProps> = ({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.045 }}
                   onClick={() => onNavigate({ page: item.id })}
-                  className="flex w-full items-baseline justify-between border-b border-[#303033]/10 py-3.5 text-left"
+                  className="flex w-full items-center justify-between border-b border-[#303033]/10 py-3.5 text-left"
                 >
-                  <div className="flex items-baseline gap-3">
-                    <span className="font-tech text-xs text-[#B8202A]">{item.index}</span>
-                    <span className="font-editorial text-3xl font-medium text-[#303033]">
-                      {item.label}
-                    </span>
-                  </div>
+                  <span className="font-editorial text-2xl sm:text-3xl font-medium text-[#303033]">
+                    {item.label}
+                  </span>
                   <ArrowUpRight className="h-4 w-4 text-[#777271]" />
                 </motion.button>
               ))}
 
+              {/* Mobile Admin Profile Link */}
               <motion.button
                 type="button"
                 onClick={() => onNavigate({ page: 'admin' })}
-                className="flex w-full items-baseline justify-between border-b border-[#303033]/10 py-3.5 text-left text-[#B8202A]"
+                className="flex w-full items-center justify-between border-b border-[#303033]/10 py-4 text-left text-[#B8202A] mt-2 bg-red-50/60 px-3 rounded-xl"
               >
-                <div className="flex items-baseline gap-3">
-                  <span className="font-tech text-xs text-[#B8202A]">ADM</span>
-                  <span className="font-editorial text-3xl font-medium">
-                    Admin Console
-                  </span>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shadow-xs">
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="block font-semibold text-sm text-[#303033]">
+                      Admin Dashboard
+                    </span>
+                    <span className="block text-xs text-[#777271]">
+                      Store management &amp; settings
+                    </span>
+                  </div>
                 </div>
-                <ShieldCheck className="h-4 w-4 text-[#B8202A]" />
+                <ArrowUpRight className="h-4 w-4 text-[#B8202A]" />
               </motion.button>
             </div>
 
