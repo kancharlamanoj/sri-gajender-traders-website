@@ -1,0 +1,190 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-porcelain: #FDFDFD;
+    --bg-ivory: #F5F3F2;
+    --bg-soft: #F5F3F2;
+    --bg-stone: #D4CFCD;
+    --bg-light-grey: #E8E5E3;
+    --text-charcoal: #303033;
+    --text-secondary: #777271;
+    --text-muted: #9A9592;
+    --accent-crimson: #B8202A;
+    --accent-crimson-hover: #961923;
+    --accent-crimson-soft: rgba(184, 32, 42, 0.08);
+    --accent-crimson-ghost: rgba(184, 32, 42, 0.06);
+    --border-hairline: rgba(48, 48, 51, 0.08);
+    --border-stone: #E8E5E3;
+  }
+
+  html {
+    background-color: #FDFDFD;
+    color: #303033;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-color: #FDFDFD;
+    color: #303033;
+    overflow-x: hidden;
+  }
+}
+
+.font-editorial {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-sans-precision {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-tech {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Luxury light surfaces — crimson identity */
+.glass-porcelain {
+  background: rgba(253, 253, 253, 0.82);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 20px 50px -18px rgba(48, 48, 51, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.glass-ivory {
+  background: rgba(245, 243, 242, 0.84);
+  backdrop-filter: blur(16px) saturate(135%);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  border: 1px solid rgba(184, 32, 42, 0.14);
+  box-shadow: 0 24px 60px -20px rgba(48, 48, 51, 0.08);
+}
+
+.crimson-hairline {
+  background: linear-gradient(
+    90deg,
+    rgba(184, 32, 42, 0) 0%,
+    rgba(184, 32, 42, 0.55) 25%,
+    rgba(184, 32, 42, 0.9) 50%,
+    rgba(184, 32, 42, 0.55) 75%,
+    rgba(184, 32, 42, 0) 100%
+  );
+}
+
+.metallic-hairline {
+  background: linear-gradient(
+    90deg,
+    rgba(184, 32, 42, 0) 0%,
+    rgba(184, 32, 42, 0.55) 25%,
+    rgba(184, 32, 42, 0.9) 50%,
+    rgba(184, 32, 42, 0.55) 75%,
+    rgba(184, 32, 42, 0) 100%
+  );
+}
+
+.champagne-border {
+  border: 1px solid rgba(184, 32, 42, 0.22);
+}
+
+.stone-border {
+  border: 1px solid #E8E5E3;
+}
+
+.architectural-grid {
+  background-size: 64px 64px;
+  background-image:
+    linear-gradient(to right, rgba(48, 48, 51, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(48, 48, 51, 0.03) 1px, transparent 1px);
+}
+
+.studio-shadow {
+  box-shadow:
+    0 32px 72px -24px rgba(48, 48, 51, 0.11),
+    0 12px 28px -12px rgba(48, 48, 51, 0.06);
+}
+
+.studio-shadow-soft {
+  box-shadow:
+    0 20px 48px -20px rgba(48, 48, 51, 0.07),
+    0 4px 16px -6px rgba(48, 48, 51, 0.04);
+}
+
+.crimson-glow {
+  box-shadow: 0 12px 32px -12px rgba(184, 32, 42, 0.35);
+}
+
+/* Tactile fine grain overlay */
+.luxury-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+/* Custom refined light scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F3F2;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4CFCD;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B8202A;
+}
+
+/* Animated editorial link underline — crimson */
+.editorial-underline {
+  position: relative;
+}
+
+.editorial-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, #B8202A, #961923);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.editorial-underline:hover::after,
+.editorial-underline:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translate3d(0, 0px, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-float-slow {
+    animation: none !important;
+  }
+}
