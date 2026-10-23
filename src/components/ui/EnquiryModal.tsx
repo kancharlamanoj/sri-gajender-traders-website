@@ -14,6 +14,7 @@ import {
   ProductItem,
   STORE_INFO,
 } from '../../data/catalogData';
+import { logNewInquiry } from '../../utils/adminStore';
 
 interface EnquiryModalProps {
   isOpen: boolean;
@@ -284,6 +285,19 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
                 href={whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  try {
+                    logNewInquiry({
+                      type: mode,
+                      customerName: customerName.trim() || 'Website Visitor',
+                      productName: product ? `${product.name} (${product.model})` : undefined,
+                      quantity: quantity || undefined,
+                      notes: notes.trim() || undefined,
+                    });
+                  } catch {
+                    // ignore
+                  }
+                }}
                 className="flex-1 inline-flex items-center justify-center gap-2.5 rounded-full bg-[#B8202A] px-6 py-3.5 text-sm font-medium text-[#FDFDFD] transition hover:bg-[#961923] shadow-md"
               >
                 <MessageCircle className="h-4 w-4" />

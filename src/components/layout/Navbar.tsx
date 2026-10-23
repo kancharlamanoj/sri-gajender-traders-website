@@ -6,6 +6,7 @@ import {
   Menu,
   MessageCircle,
   Search,
+  ShieldCheck,
   X,
 } from 'lucide-react';
 import { getLiveStoreStatus, STORE_INFO } from '../../data/catalogData';
@@ -151,6 +152,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Search className="h-3.5 w-3.5" />
               </button>
 
+              <button
+                type="button"
+                onClick={() => onNavigate({ page: 'admin' })}
+                aria-label="Admin Operations Console"
+                title="Admin Operations Console"
+                className={`flex h-9 w-9 items-center justify-center rounded-full border transition ${
+                  currentPage === 'admin'
+                    ? 'border-[#B8202A] bg-[#B8202A] text-white shadow-sm'
+                    : 'border-[#303033]/12 bg-[#FDFDFD] text-[#303033] hover:border-[#B8202A] hover:bg-[#F5F3F2]'
+                }`}
+              >
+                <ShieldCheck className="h-4 w-4" />
+              </button>
+
               <MagneticButton
                 onClick={() => onOpenConcierge('retail')}
                 cursorLabel="ENQUIRE"
@@ -207,6 +222,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <ArrowUpRight className="h-4 w-4 text-[#777271]" />
                 </motion.button>
               ))}
+
+              <motion.button
+                type="button"
+                onClick={() => onNavigate({ page: 'admin' })}
+                className="flex w-full items-baseline justify-between border-b border-[#303033]/10 py-3.5 text-left text-[#B8202A]"
+              >
+                <div className="flex items-baseline gap-3">
+                  <span className="font-tech text-xs text-[#B8202A]">ADM</span>
+                  <span className="font-editorial text-3xl font-medium">
+                    Admin Console
+                  </span>
+                </div>
+                <ShieldCheck className="h-4 w-4 text-[#B8202A]" />
+              </motion.button>
             </div>
 
             <div className="mt-8 rounded-2xl bg-[#F5F3F2] p-5 border border-[#B8202A]/30 space-y-4">

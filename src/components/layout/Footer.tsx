@@ -164,6 +164,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenConcierge }) =
                 </button>
               </li>
               <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate({ page: 'admin' })}
+                  className="editorial-underline text-sm text-[#B8202A] hover:text-[#961923] font-medium"
+                >
+                  Admin Operations Console
+                </button>
+              </li>
+              <li>
                 <a
                   href={STORE_INFO.instagramUrl}
                   target="_blank"

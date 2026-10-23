@@ -23,6 +23,7 @@ import { BrandsPage } from './pages/BrandsPage';
 import { WholesalePage } from './pages/WholesalePage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
+import { AdminPage } from './pages/AdminPage';
 import { EnquiryModal } from './components/ui/EnquiryModal';
 import { QuickSearchModal } from './components/ui/QuickSearchModal';
 import {
@@ -51,6 +52,7 @@ function parseHashToRoute(): RouteState {
     'wholesale',
     'about',
     'contact',
+    'admin',
   ];
   const page = validPages.includes(pathPart as PageRoute)
     ? (pathPart as PageRoute)
@@ -170,8 +172,9 @@ export default function App() {
       wholesale: `Wholesale & Business Supply | ${base}`,
       about: `Tirupati Atelier & Provenance | ${base}`,
       contact: `Showroom Hours, Warranty Help & Directions | ${base}`,
+      admin: `Operations & Content Management Console | ${base}`,
     };
-    document.title = pageTitles[route.page];
+    document.title = pageTitles[route.page] || base;
   }, [route]);
 
   const activeProduct =
@@ -274,6 +277,10 @@ export default function App() {
                 onNavigate={navigate}
                 onOpenConcierge={handleOpenConcierge}
               />
+            )}
+
+            {route.page === 'admin' && (
+              <AdminPage onNavigate={navigate} />
             )}
           </motion.div>
         </AnimatePresence>

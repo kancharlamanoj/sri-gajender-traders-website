@@ -89,7 +89,29 @@ export interface BrandProfile {
   signatureCapabilities: string[];
 }
 
-export const STORE_INFO = {
+export interface StoreHour {
+  day: string;
+  hours: string;
+  highlight: boolean;
+}
+
+export interface StoreInfo {
+  name: string;
+  flagshipTitle: string;
+  roleStatement: string;
+  addressLine1: string;
+  addressLine2: string;
+  fullAddress: string;
+  coordinates: string;
+  locality: string;
+  instagramUrl: string;
+  instagramHandle: string;
+  googleMapsUrl: string;
+  hours: StoreHour[];
+  regionalHeritageNote: string;
+}
+
+export const STORE_INFO: StoreInfo = {
   name: 'Sri Gajender Traders',
   flagshipTitle: 'The Future, Curated.',
   roleStatement:
@@ -178,9 +200,23 @@ export function getLiveStoreStatus(): {
   }
 }
 
-export function buildWhatsAppEnquiryUrl(message: string): string {
+export function buildWhatsAppEnquiryUrl(message: string, customPhone?: string): string {
+  let targetNumber = customPhone?.replace(/[^0-9]/g, '') || '';
+  if (!targetNumber && typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('sgt_admin_settings_v1');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.customWhatsAppNumber) {
+          targetNumber = parsed.customWhatsAppNumber.replace(/[^0-9]/g, '');
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
   const encoded = encodeURIComponent(message);
-  return `https://wa.me/?text=${encoded}`;
+  return targetNumber ? `https://wa.me/${targetNumber}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
 }
 
 export function formatProductWhatsAppMessage(product: ProductItem, quantityNote?: string): string {

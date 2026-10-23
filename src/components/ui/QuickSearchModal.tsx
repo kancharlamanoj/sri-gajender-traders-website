@@ -7,6 +7,7 @@ import {
   ProductItem,
   STORE_INFO,
 } from '../../data/catalogData';
+import { getStoredProducts } from '../../utils/adminStore';
 import { NavigateFn } from '../../types/navigation';
 
 interface QuickSearchModalProps {
@@ -43,9 +44,10 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
   }, [isOpen, onClose]);
 
   const matchedProducts = useMemo(() => {
+    const list = getStoredProducts();
     const q = query.trim().toLowerCase();
-    if (!q) return PRODUCTS.slice(0, 5);
-    return PRODUCTS.filter((p) =>
+    if (!q) return list.slice(0, 5);
+    return list.filter((p) =>
       `${p.name} ${p.brandName} ${p.model} ${p.categoryLabel} ${p.tagline}`
         .toLowerCase()
         .includes(q)

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import {
   CATEGORIES,
@@ -6,6 +6,7 @@ import {
   PRODUCTS,
   ProductItem,
 } from '../../data/catalogData';
+import { getStoredProducts } from '../../utils/adminStore';
 import { NavigateFn } from '../../types/navigation';
 import { ProductCard } from '../catalogue/ProductCard';
 import { MaskTextReveal } from '../ui/MicroInteractions';
@@ -22,11 +23,18 @@ export const FeaturedShowcaseSection: React.FC<FeaturedShowcaseSectionProps> = (
   onEnquireProduct,
 }) => {
   const [filterCat, setFilterCat] = useState<'featured' | CategorySlug>('featured');
+  const [allProducts, setAllProducts] = useState<ProductItem[]>(() => getStoredProducts());
+
+  useEffect(() => {
+    const onDataChange = () => setAllProducts(getStoredProducts());
+    window.addEventListener('sgt-data-update', onDataChange);
+    return () => window.removeEventListener('sgt-data-update', onDataChange);
+  }, []);
 
   const visibleProducts =
     filterCat === 'featured'
-      ? PRODUCTS.filter((p) => p.featured).slice(0, 6)
-      : PRODUCTS.filter((p) => p.category === filterCat).slice(0, 6);
+      ? allProducts.filter((p) => p.featured).slice(0, 6)
+      : allProducts.filter((p) => p.category === filterCat).slice(0, 6);
 
   return (
     <section

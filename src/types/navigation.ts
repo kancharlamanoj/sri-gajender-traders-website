@@ -7,7 +7,8 @@ export type PageRoute =
   | 'brands'
   | 'wholesale'
   | 'about'
-  | 'contact';
+  | 'contact'
+  | 'admin';
 
 export interface RouteState {
   page: PageRoute;

@@ -18,6 +18,7 @@ import {
   PRODUCTS,
   ProductItem,
 } from '../data/catalogData';
+import { getStoredProducts } from '../utils/adminStore';
 import { ProductCard } from '../components/catalogue/ProductCard';
 import { BrandWordmark } from '../components/ui/BrandWordmark';
 import { MaskTextReveal } from '../components/ui/MicroInteractions';
@@ -48,6 +49,13 @@ export const CataloguePage: React.FC<CataloguePageProps> = ({
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [viewMode, setViewMode] = useState<'grid' | 'ledger'>('grid');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [allProducts, setAllProducts] = useState<ProductItem[]>(() => getStoredProducts());
+
+  useEffect(() => {
+    const onDataChange = () => setAllProducts(getStoredProducts());
+    window.addEventListener('sgt-data-update', onDataChange);
+    return () => window.removeEventListener('sgt-data-update', onDataChange);
+  }, []);
 
   useEffect(() => {
     setSelectedCategory(initialCategory);
@@ -63,7 +71,7 @@ export const CataloguePage: React.FC<CataloguePageProps> = ({
 
   const filteredProducts = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return PRODUCTS.filter((item) => {
+    return allProducts.filter((item) => {
       if (selectedCategory !== 'all' && item.category !== selectedCategory) {
         return false;
       }
