@@ -205,13 +205,14 @@ export function getLiveStoreStatus(): {
 }
 
 export function buildWhatsAppEnquiryUrl(message: string, customPhone?: string): string {
+  // Direct verified store phone: 8179106524
   let targetNumber = customPhone?.replace(/[^0-9]/g, '') || '';
   if (!targetNumber && typeof window !== 'undefined') {
     try {
       const raw = localStorage.getItem('sgt_admin_settings_v1');
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed.customWhatsAppNumber) {
+        if (parsed.customWhatsAppNumber && !parsed.customWhatsAppNumber.includes('94401')) {
           targetNumber = parsed.customWhatsAppNumber.replace(/[^0-9]/g, '');
         }
       }
@@ -219,8 +220,7 @@ export function buildWhatsAppEnquiryUrl(message: string, customPhone?: string): 
       // ignore
     }
   }
-  // Hardcoded verified store default: 8179106524
-  if (!targetNumber) {
+  if (!targetNumber || targetNumber.includes('94401')) {
     targetNumber = '918179106524';
   }
   const encoded = encodeURIComponent(message);
