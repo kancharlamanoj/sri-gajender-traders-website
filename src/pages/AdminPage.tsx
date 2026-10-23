@@ -613,7 +613,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                   </div>
                 </div>
                 <div className="mt-4 text-base font-bold text-slate-900 truncate">
-                  {settings.customWhatsAppNumber || '+91 94401 55920'}
+                  {settings.customWhatsAppNumber || '+91 8179106524'}
                 </div>
                 <div className="mt-2 text-xs text-slate-500 flex items-center gap-1 group-hover:text-red-600 font-medium">
                   <span>Showroom address & contact</span>
@@ -1282,7 +1282,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                       customWhatsAppNumber: e.target.value,
                     })
                   }
-                  placeholder="+91 94401 55920"
+                  placeholder="+91 8179106524"
                   className="w-full px-4 py-2.5 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 font-mono"
                 />
                 <p className="text-xs text-slate-500 mt-1">

@@ -197,7 +197,6 @@ export default function App() {
       )}
 
       <ScrollProgressBar />
-      <LuxuryDesktopCursor />
 
       {route.page !== 'admin' && (
         <Navbar

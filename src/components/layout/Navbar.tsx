@@ -26,7 +26,7 @@ const NAV_ITEMS: { id: PageRoute; label: string; index: string }[] = [
   { id: 'brands', label: 'Brands', index: '03' },
   { id: 'wholesale', label: 'Wholesale', index: '04' },
   { id: 'about', label: 'Atelier', index: '05' },
-  { id: 'contact', label: 'Visit & Assist', index: '06' },
+  { id: 'contact', label: 'Contact Us', index: '06' },
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({

@@ -99,6 +99,8 @@ export interface StoreInfo {
   name: string;
   flagshipTitle: string;
   roleStatement: string;
+  phone: string;
+  displayPhone: string;
   addressLine1: string;
   addressLine2: string;
   fullAddress: string;
@@ -116,6 +118,8 @@ export const STORE_INFO: StoreInfo = {
   flagshipTitle: 'The Future, Curated.',
   roleStatement:
     'Andhra Pradesh regional supplier & retail flagship carrying consumer audio, personal grooming, workspace peripherals, optical surveillance, and commercial equipment.',
+  phone: '+91 8179106524',
+  displayPhone: '8179106524',
   addressLine1: '1st Floor, 5-1-6, Sarojini Devi Rd',
   addressLine2: 'Nehru Nagar, Tirupati, Andhra Pradesh 517501',
   fullAddress: '1st floor, 5-1-6, Sarojini Devi Rd, Nehru Nagar, Tirupati, Andhra Pradesh 517501',

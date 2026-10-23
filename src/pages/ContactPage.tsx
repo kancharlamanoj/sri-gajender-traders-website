@@ -5,6 +5,7 @@ import {
   Compass,
   MapPin,
   MessageCircle,
+  PhoneCall,
   ShieldCheck,
   Tag,
 } from 'lucide-react';
@@ -351,8 +352,49 @@ export const ContactPage: React.FC<ContactPageProps> = ({
             )}
           </div>
 
-          {/* Right 5 Cols: Complete Verified Operating Hours Ledger */}
+          {/* Right 5 Cols: Direct Contact Card & Complete Operating Hours Ledger */}
           <div className="lg:col-span-5 space-y-6">
+            {/* Direct Phone & WhatsApp Hotline Card */}
+            <div className="rounded-[2.25rem] bg-white border border-[#B8202A]/40 p-6 sm:p-8 studio-shadow-soft space-y-4">
+              <div className="flex items-center gap-2 font-tech text-[11px] uppercase tracking-[0.2em] text-[#B8202A]">
+                <PhoneCall className="h-4 w-4 text-[#B8202A]" />
+                <span>Direct Contact Hotline</span>
+              </div>
+
+              <div>
+                <a
+                  href="tel:8179106524"
+                  className="font-editorial text-3xl sm:text-4xl font-semibold text-[#303033] hover:text-[#B8202A] transition tracking-tight"
+                >
+                  +91 8179106524
+                </a>
+                <p className="mt-1 text-xs text-[#777271]">
+                  Direct call or WhatsApp message for pricing, wholesale orders, and store visits.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2.5 pt-2">
+                <a
+                  href="tel:8179106524"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-[#303033] px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-[#B8202A] transition"
+                >
+                  <PhoneCall className="h-3.5 w-3.5" />
+                  <span>Call Now</span>
+                </a>
+                <a
+                  href={`https://wa.me/918179106524?text=${encodeURIComponent(
+                    'Hello Sri Gajender Traders, I would like to inquire about products and pricing.'
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-white hover:bg-emerald-700 transition"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+            </div>
+
             <div className="rounded-[2.25rem] bg-[#F5F3F2] border border-[#B8202A]/45 p-7 sm:p-9 studio-shadow-soft space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 font-tech text-[11px] uppercase tracking-[0.2em] text-[#B8202A]">

@@ -56,7 +56,7 @@ const SEED_INQUIRIES: InboundInquiry[] = [
     timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
     type: 'retail',
     customerName: 'Kavitha M. (Tirupati)',
-    phone: '+91 94401 55920',
+    phone: '+91 8179106524',
     productName: 'Portronics SoundDrum P 20W',
     quantity: '1 Unit',
     notes: 'Can I pick this up directly today at Nehru Nagar showroom?',
@@ -160,7 +160,7 @@ export function saveStoredBrands(brands: BrandProfile[]): void {
 export function getStoredSettings(): AdminSettings {
   const defaults: AdminSettings = {
     storeInfo: INITIAL_STORE_INFO,
-    customWhatsAppNumber: '+91 94401 55920',
+    customWhatsAppNumber: '+91 8179106524',
     enableAnnouncement: false,
     announcementText: 'Special festive wholesale pricing available across audio and optical surveillance hardware this week!',
     maintenanceMode: false,

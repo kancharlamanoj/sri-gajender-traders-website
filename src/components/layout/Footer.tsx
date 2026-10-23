@@ -49,6 +49,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenConcierge }) =
                 <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-[#B8202A]" />
                 <span>{STORE_INFO.fullAddress}</span>
               </div>
+              <div className="flex items-center gap-2.5 pt-1 text-sm font-medium text-[#303033]">
+                <span className="text-[#B8202A] font-tech text-xs uppercase font-bold">Call / WhatsApp:</span>
+                <a href="tel:8179106524" className="font-tech text-[#B8202A] hover:underline font-bold">
+                  +91 8179106524
+                </a>
+              </div>
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -160,7 +166,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenConcierge }) =
                   onClick={() => onNavigate({ page: 'contact' })}
                   className="editorial-underline text-sm text-[#303033] hover:text-[#303033]"
                 >
-                  Hours &amp; Assistance
+                  Contact Us
                 </button>
               </li>
               <li>
