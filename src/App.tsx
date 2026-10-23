@@ -191,12 +191,14 @@ export default function App() {
       <ScrollProgressBar />
       <LuxuryDesktopCursor />
 
-      <Navbar
-        currentPage={route.page}
-        onNavigate={navigate}
-        onOpenConcierge={handleOpenConcierge}
-        onOpenQuickSearch={() => setQuickSearchOpen(true)}
-      />
+      {route.page !== 'admin' && (
+        <Navbar
+          currentPage={route.page}
+          onNavigate={navigate}
+          onOpenConcierge={handleOpenConcierge}
+          onOpenQuickSearch={() => setQuickSearchOpen(true)}
+        />
+      )}
 
       <main id="main-content">
         <AnimatePresence mode="wait">
@@ -286,7 +288,9 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      <Footer onNavigate={navigate} onOpenConcierge={handleOpenConcierge} />
+      {route.page !== 'admin' && (
+        <Footer onNavigate={navigate} onOpenConcierge={handleOpenConcierge} />
+      )}
 
       <EnquiryModal
         isOpen={conciergeOpen}

@@ -17,7 +17,6 @@ import {
   Lock,
   ArrowUpRight,
   TrendingUp,
-  SlidersHorizontal,
   Eye,
   Store,
   Phone,
@@ -25,6 +24,13 @@ import {
   Sparkles,
   Download,
   Upload,
+  ArrowLeft,
+  ChevronRight,
+  Filter,
+  CheckCircle2,
+  AlertCircle,
+  HelpCircle,
+  Info,
 } from 'lucide-react';
 import {
   ProductItem,
@@ -56,40 +62,38 @@ interface AdminPageProps {
   onNavigate: NavigateFn;
 }
 
-type TabKey = 'overview' | 'products' | 'categories' | 'brands' | 'inquiries' | 'settings';
+type TabKey = 'dashboard' | 'products' | 'categories' | 'brands' | 'inquiries' | 'settings';
 
 export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(isAdminAuthenticated());
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
 
-  const [activeTab, setActiveTab] = useState<TabKey>('overview');
+  const [activeTab, setActiveTab] = useState<TabKey>('dashboard');
 
-  // State caches
+  // Stored state
   const [products, setProducts] = useState<ProductItem[]>(getStoredProducts());
   const [categories, setCategories] = useState<CategoryInfo[]>(getStoredCategories());
   const [brands, setBrands] = useState<BrandProfile[]>(getStoredBrands());
   const [settings, setSettings] = useState<AdminSettings>(getStoredSettings());
   const [inquiries, setInquiries] = useState<InboundInquiry[]>(getStoredInquiries());
 
-  // Search & Filters in Products
+  // Search & Filter in Products Tab
   const [prodSearch, setProdSearch] = useState('');
   const [prodCategoryFilter, setProdCategoryFilter] = useState<string>('all');
   const [prodBrandFilter, setProdBrandFilter] = useState<string>('all');
 
-  // Modal / Editing State for Product
+  // Modals
   const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
-  // Category Edit State
   const [editingCategory, setEditingCategory] = useState<CategoryInfo | null>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
-  // Brand Edit State
   const [editingBrand, setEditingBrand] = useState<BrandProfile | null>(null);
   const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
 
-  // Notification Toast
+  // Quick feedback banner / toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -111,33 +115,32 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
     return () => window.removeEventListener('sgt-data-update', handleDataUpdate);
   }, []);
 
+  // Login handler
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Default master passcodes: 'admin123', 'gajender2026', or 'tirupati'
     const allowed = ['admin', 'admin123', 'gajender', 'gajender2026', 'tirupati'];
     if (allowed.includes(passcode.trim().toLowerCase())) {
       setAdminAuthenticated(true);
       setIsAuthenticated(true);
       setAuthError('');
-      showToast('Admin authorized successfully');
+      showToast('Welcome back, Admin!');
     } else {
-      setAuthError('Invalid passcode. Use "admin123" or "gajender2026"');
+      setAuthError('Incorrect passcode. Try "admin123"');
     }
   };
 
   const handleLogout = () => {
     setAdminAuthenticated(false);
     setIsAuthenticated(false);
-    showToast('Signed out of admin console');
+    showToast('Signed out successfully');
   };
 
   // Product Actions
   const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
-
     if (!editingProduct.name.trim() || !editingProduct.model.trim()) {
-      alert('Product name and model are required');
+      alert('Please fill in Product Name and Model Code');
       return;
     }
 
@@ -146,7 +149,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
 
     if (exists) {
       updated = products.map((p) => (p.id === editingProduct.id ? editingProduct : p));
-      showToast(`Updated "${editingProduct.name}"`);
+      showToast(`Saved changes for "${editingProduct.name}"`);
     } else {
       updated = [editingProduct, ...products];
       showToast(`Added new product "${editingProduct.name}"`);
@@ -159,11 +162,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
   };
 
   const handleDeleteProduct = (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+    if (window.confirm(`Delete "${name}" from store catalogue?`)) {
       const updated = products.filter((p) => p.id !== id);
       setProducts(updated);
       saveStoredProducts(updated);
-      showToast(`Deleted "${name}"`);
+      showToast(`Removed "${name}"`);
     }
   };
 
@@ -173,10 +176,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
     );
     setProducts(updated);
     saveStoredProducts(updated);
-    showToast('Updated featured status');
+    showToast('Updated homepage featured badge');
   };
 
-  // New Blank Product template
   const openNewProductModal = () => {
     const randId = `prod-${Date.now().toString(36)}`;
     const newProd: ProductItem = {
@@ -195,17 +197,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
       secondaryImage:
         'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=80',
       verifiedSpecs: [
-        { label: 'Warranty', value: '1 Year Manufacturer Official' },
-        { label: 'Connectivity', value: 'Bluetooth v5.3' },
+        { label: 'Warranty', value: '1 Year Brand Warranty' },
+        { label: 'Condition', value: 'Brand New Sealed' },
       ],
-      keyHighlights: ['Brand Genuine', 'High Quality', 'Immediate Dispatch'],
+      keyHighlights: ['Brand Genuine', 'Fast Delivery in Tirupati', 'Best Price'],
       featured: false,
     };
     setEditingProduct(newProd);
     setIsProductModalOpen(true);
   };
 
-  // Inquiry Status update
+  // Inquiry Status
   const handleUpdateInquiryStatus = (
     id: string,
     status: 'new' | 'contacted' | 'resolved'
@@ -215,7 +217,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
     );
     setInquiries(updated);
     saveStoredInquiries(updated);
-    showToast(`Inquiry marked as ${status}`);
+    showToast(`Inquiry status updated to ${status}`);
   };
 
   const handleDeleteInquiry = (id: string) => {
@@ -225,7 +227,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
     showToast('Inquiry removed');
   };
 
-  // Export / Import
+  // Backup & Restore
   const handleExportJSON = () => {
     const payload = {
       products,
@@ -241,9 +243,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `sri-gajender-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `sri-gajender-data-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
-    showToast('Database backup downloaded');
+    showToast('Backup file downloaded');
   };
 
   const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,15 +261,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
         if (parsed.settings) saveStoredSettings(parsed.settings);
         if (parsed.inquiries) saveStoredInquiries(parsed.inquiries);
         reloadAll();
-        showToast('Database imported & restored successfully');
-      } catch (err) {
-        alert('Invalid JSON backup file');
+        showToast('Backup restored successfully');
+      } catch {
+        alert('Invalid file format. Please upload a valid JSON backup.');
       }
     };
     reader.readAsText(file);
   };
 
-  // Filtered Products
+  // Filter products
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(prodSearch.toLowerCase()) ||
@@ -280,137 +282,142 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
     return matchesSearch && matchesCat && matchesBrand;
   });
 
-  // If Not Authenticated -> Login Screen
+  const newInquiriesCount = inquiries.filter((i) => i.status === 'new').length;
+
+  // -------------------------------------------------------------
+  // LOGIN SCREEN: Clean, Modern, Simple
+  // -------------------------------------------------------------
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen pt-28 pb-20 px-4 flex items-center justify-center bg-[#F5F3F2]">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="w-full max-w-md bg-[#FDFDFD] border border-[#B8202A]/25 rounded-3xl p-8 sm:p-10 studio-shadow-soft"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-[#B8202A] text-[#FDFDFD] flex items-center justify-center shadow-lg shadow-[#B8202A]/20">
-              <Lock className="w-6 h-6" />
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 border border-slate-100">
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-600/30 mb-4">
+              <Lock className="w-7 h-7" />
             </div>
-            <div>
-              <div className="font-tech text-[10px] tracking-[0.25em] uppercase text-[#B8202A]">
-                COMMAND ATELIER
-              </div>
-              <h1 className="font-editorial text-2xl font-normal text-[#303033]">
-                Admin Console
-              </h1>
-            </div>
+            <h1 className="text-2xl font-bold text-slate-800">
+              Store Admin Login
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Sri Gajender Traders · Operations Control
+            </p>
           </div>
 
-          <p className="text-xs text-[#777271] mb-6 leading-relaxed">
-            Enter the authorized access passcode to manage live catalogue models, brand profiles, showroom timings, WhatsApp routes, and wholesale inquiries.
-          </p>
-
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-[11px] font-tech uppercase tracking-wider text-[#777271] mb-2">
-                Security Passcode
+              <label className="block text-xs font-semibold uppercase text-slate-600 tracking-wider mb-2">
+                Admin Passcode
               </label>
               <input
                 type="password"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 placeholder="Enter passcode (e.g. admin123)"
-                className="w-full px-4 py-3 text-sm rounded-xl bg-[#F5F3F2] border border-[#303033]/15 focus:outline-none focus:border-[#B8202A] transition"
+                className="w-full px-4 py-3 text-sm rounded-xl bg-slate-50 border border-slate-300 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition"
                 autoFocus
               />
             </div>
 
             {authError && (
-              <div className="text-xs text-red-600 bg-red-50 p-3 rounded-xl border border-red-200">
-                {authError}
+              <div className="flex items-center gap-2 text-xs font-medium text-red-600 bg-red-50 p-3 rounded-xl border border-red-200">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{authError}</span>
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full py-3.5 px-6 rounded-xl bg-[#B8202A] text-white font-medium text-xs tracking-wider uppercase hover:bg-[#961923] transition shadow-md shadow-[#B8202A]/20"
+              className="w-full py-3.5 px-4 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700 transition shadow-md shadow-red-600/25 active:scale-[0.99]"
             >
-              Authorize & Enter
+              Log In to Admin
             </button>
 
-            <div className="pt-2 text-center">
-              <button
-                type="button"
-                onClick={() => onNavigate({ page: 'home' })}
-                className="text-xs text-[#777271] hover:text-[#B8202A] transition underline underline-offset-4"
-              >
-                ← Return to Public Flagship
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => onNavigate({ page: 'home' })}
+              className="w-full py-2.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition flex items-center justify-center gap-1.5"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Customer Website</span>
+            </button>
           </form>
 
-          <div className="mt-8 pt-4 border-t border-[#303033]/10 text-[11px] text-[#777271] text-center font-tech">
-            HINT: Default demo key is <span className="text-[#B8202A] font-semibold">admin123</span>
+          <div className="mt-8 pt-5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+            <span>Default demo password:</span>
+            <span className="font-mono font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">
+              admin123
+            </span>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
+  // -------------------------------------------------------------
+  // AUTHENTICATED ADMIN PANEL: Premium Clean Dashboard UI
+  // -------------------------------------------------------------
   return (
-    <div className="min-h-screen pt-28 pb-24 bg-[#F5F3F2] text-[#303033]">
-      {/* Toast Notification */}
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
+      {/* Toast Popup Notification */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-24 right-6 z-[100] bg-[#303033] text-[#FDFDFD] px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs"
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-6 right-6 z-[150] bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-sm font-medium border border-slate-700"
           >
-            <Check className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
             <span>{toastMessage}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12">
-        {/* Header Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-8 border-b border-[#303033]/10">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <span className="font-tech text-[10px] tracking-[0.24em] uppercase px-2.5 py-0.5 rounded-full bg-[#B8202A]/10 text-[#B8202A] font-semibold">
-                LIVE PRODUCTION CONSOLE
-              </span>
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs text-emerald-700 font-tech">Connected</span>
+      {/* TOP NAVBAR: Sleek, high-contrast, responsive */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
+              SG
             </div>
-            <h1 className="font-editorial text-3xl sm:text-4xl text-[#303033] font-normal mt-1">
-              Store Operations & Content Manager
-            </h1>
+            <div>
+              <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                Sri Gajender Traders
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                  Admin Panel
+                </span>
+              </div>
+              <div className="text-xs text-slate-500">
+                Store Operations & Content Manager
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => onNavigate({ page: 'home' })}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs rounded-xl bg-[#FDFDFD] border border-[#303033]/15 hover:border-[#B8202A] hover:text-[#B8202A] transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition"
+              title="Open public website in client view"
             >
-              <Eye className="w-3.5 h-3.5" />
-              <span>View Live Website</span>
+              <Eye className="w-3.5 h-3.5 text-slate-500" />
+              <span className="hidden sm:inline">View Website</span>
             </button>
 
             <button
               onClick={handleExportJSON}
-              title="Download full database snapshot"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-xl bg-[#FDFDFD] border border-[#303033]/15 hover:bg-[#F5F3F2] transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition"
+              title="Download backup file of all store data"
             >
-              <Download className="w-3.5 h-3.5 text-[#777271]" />
-              <span>Backup</span>
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span className="hidden sm:inline">Backup</span>
             </button>
 
             <label
-              title="Restore from JSON backup file"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-xl bg-[#FDFDFD] border border-[#303033]/15 hover:bg-[#F5F3F2] transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+              title="Upload backup file to restore"
             >
-              <Upload className="w-3.5 h-3.5 text-[#777271]" />
-              <span>Restore</span>
+              <Upload className="w-3.5 h-3.5 text-slate-500" />
+              <span className="hidden sm:inline">Restore</span>
               <input
                 type="file"
                 accept=".json"
@@ -421,29 +428,29 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
 
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition ml-2"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Lock Console</span>
+              <span>Log Out</span>
             </button>
           </div>
         </div>
 
-        {/* Tab Navigation Ribbon */}
-        <div className="flex items-center gap-2 overflow-x-auto py-5 border-b border-[#303033]/10 no-scrollbar">
+        {/* HORIZONTAL TAB BAR */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-1 overflow-x-auto no-scrollbar border-t border-slate-100">
           {[
-            { id: 'overview', label: 'Dashboard Overview', icon: TrendingUp, count: null },
-            { id: 'products', label: 'Products & Catalogue', icon: Package, count: products.length },
+            { id: 'dashboard', label: 'Dashboard', icon: TrendingUp, count: null },
+            { id: 'products', label: 'Products', icon: Package, count: products.length },
             { id: 'categories', label: 'Categories', icon: Layers, count: categories.length },
-            { id: 'brands', label: 'Brand Profiles', icon: Award, count: brands.length },
+            { id: 'brands', label: 'Brands', icon: Award, count: brands.length },
             {
               id: 'inquiries',
               label: 'Customer Inquiries',
               icon: Inbox,
-              count: inquiries.filter((i) => i.status === 'new').length,
-              badgeHighlight: true,
+              count: newInquiriesCount,
+              alert: newInquiriesCount > 0,
             },
-            { id: 'settings', label: 'Store & Timings', icon: Settings, count: null },
+            { id: 'settings', label: 'Store Settings', icon: Settings, count: null },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -451,22 +458,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabKey)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                className={`flex items-center gap-2 py-3 px-3.5 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap transition-colors ${
                   isActive
-                    ? 'bg-[#B8202A] text-white shadow-md shadow-[#B8202A]/20'
-                    : 'bg-[#FDFDFD] text-[#303033] hover:bg-[#FDFDFD]/80 border border-[#303033]/10'
+                    ? 'border-red-600 text-red-600 font-semibold'
+                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-[#777271]'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-red-600' : 'text-slate-400'}`} />
                 <span>{tab.label}</span>
                 {tab.count !== null && (
                   <span
-                    className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : tab.badgeHighlight && tab.count > 0
-                        ? 'bg-[#B8202A] text-white'
-                        : 'bg-[#F5F3F2] text-[#777271]'
+                    className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                      tab.alert
+                        ? 'bg-red-600 text-white'
+                        : isActive
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-slate-100 text-slate-600'
                     }`}
                   >
                     {tab.count}
@@ -476,285 +483,276 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
             );
           })}
         </div>
+      </header>
 
-        {/* TAB 1: OVERVIEW */}
-        {activeTab === 'overview' && (
-          <div className="py-8 space-y-8">
-            {/* Top Quick Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-[#FDFDFD] p-5 rounded-2xl border border-[#303033]/10">
-                <div className="flex items-center justify-between text-[#777271] text-xs font-tech">
-                  <span>TOTAL CATALOGUE MODELS</span>
-                  <Package className="w-4 h-4 text-[#B8202A]" />
+      {/* MAIN CONTENT AREA */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        {/* ========================================================= */}
+        {/* TAB 1: DASHBOARD OVERVIEW                                  */}
+        {/* ========================================================= */}
+        {activeTab === 'dashboard' && (
+          <div className="space-y-8">
+            {/* Metric Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div
+                onClick={() => setActiveTab('products')}
+                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-red-300 hover:shadow-md transition cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Total Products
+                  </span>
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <Package className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="mt-3 font-editorial text-3xl text-[#303033]">
+                <div className="mt-4 text-3xl font-extrabold text-slate-900">
                   {products.length}
                 </div>
-                <div className="mt-1 text-[11px] text-[#777271]">
-                  {products.filter((p) => p.featured).length} featured on homepage showcase
+                <div className="mt-2 text-xs text-slate-500 flex items-center gap-1 group-hover:text-red-600 font-medium">
+                  <span>Manage catalogue models</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </div>
               </div>
 
-              <div className="bg-[#FDFDFD] p-5 rounded-2xl border border-[#303033]/10">
-                <div className="flex items-center justify-between text-[#777271] text-xs font-tech">
-                  <span>PARTNER BRANDS</span>
-                  <Award className="w-4 h-4 text-[#B8202A]" />
+              <div
+                onClick={() => setActiveTab('inquiries')}
+                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-red-300 hover:shadow-md transition cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    New Inquiries
+                  </span>
+                  <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+                    <Inbox className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="mt-3 font-editorial text-3xl text-[#303033]">
+                <div className="mt-4 text-3xl font-extrabold text-red-600">
+                  {newInquiriesCount}
+                </div>
+                <div className="mt-2 text-xs text-slate-500 flex items-center gap-1 group-hover:text-red-600 font-medium">
+                  <span>Pending customer quotes</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
+
+              <div
+                onClick={() => setActiveTab('brands')}
+                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-red-300 hover:shadow-md transition cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Partner Brands
+                  </span>
+                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <Award className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-4 text-3xl font-extrabold text-slate-900">
                   {brands.length}
                 </div>
-                <div className="mt-1 text-[11px] text-[#777271]">
-                  boAt, Portronics, Zebronics, Boult, Hikvision
+                <div className="mt-2 text-xs text-slate-500 flex items-center gap-1 group-hover:text-red-600 font-medium">
+                  <span>boAt, Portronics, Hikvision...</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </div>
               </div>
 
-              <div className="bg-[#FDFDFD] p-5 rounded-2xl border border-[#303033]/10">
-                <div className="flex items-center justify-between text-[#777271] text-xs font-tech">
-                  <span>NEW INQUIRIES</span>
-                  <Inbox className="w-4 h-4 text-[#B8202A]" />
+              <div
+                onClick={() => setActiveTab('settings')}
+                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-red-300 hover:shadow-md transition cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    WhatsApp Routing
+                  </span>
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <Phone className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="mt-3 font-editorial text-3xl text-[#B8202A]">
-                  {inquiries.filter((i) => i.status === 'new').length}
+                <div className="mt-4 text-base font-bold text-slate-900 truncate">
+                  {settings.customWhatsAppNumber || '+91 94401 55920'}
                 </div>
-                <div className="mt-1 text-[11px] text-[#777271]">
-                  Awaiting WhatsApp / phone follow-up
-                </div>
-              </div>
-
-              <div className="bg-[#FDFDFD] p-5 rounded-2xl border border-[#303033]/10">
-                <div className="flex items-center justify-between text-[#777271] text-xs font-tech">
-                  <span>SHOWROOM OPERATING STATUS</span>
-                  <Store className="w-4 h-4 text-[#B8202A]" />
-                </div>
-                <div className="mt-3 font-editorial text-xl text-emerald-600 font-medium">
-                  Nehru Nagar Flagship
-                </div>
-                <div className="mt-1 text-[11px] text-[#777271]">
-                  Tuesday 24H · Mon/Wed-Sat 9:30AM–9:30PM
+                <div className="mt-2 text-xs text-slate-500 flex items-center gap-1 group-hover:text-red-600 font-medium">
+                  <span>Showroom address & contact</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions & Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left Column: Quick Actions */}
-              <div className="lg:col-span-4 space-y-4">
-                <div className="bg-[#FDFDFD] p-6 rounded-2xl border border-[#303033]/10">
-                  <h3 className="font-editorial text-lg text-[#303033] mb-4">
-                    Quick Operational Actions
-                  </h3>
-                  <div className="space-y-2.5">
-                    <button
-                      onClick={openNewProductModal}
-                      className="w-full flex items-center justify-between p-3 rounded-xl bg-[#F5F3F2] hover:bg-[#B8202A] hover:text-white transition group text-xs font-medium"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Plus className="w-4 h-4 text-[#B8202A] group-hover:text-white" />
-                        Add New Hardware Model
-                      </span>
-                      <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
-                    </button>
-
-                    <button
-                      onClick={() => setActiveTab('inquiries')}
-                      className="w-full flex items-center justify-between p-3 rounded-xl bg-[#F5F3F2] hover:bg-[#303033] hover:text-white transition group text-xs font-medium"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Inbox className="w-4 h-4 text-[#B8202A] group-hover:text-white" />
-                        Review Inbound Quotes ({inquiries.length})
-                      </span>
-                      <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
-                    </button>
-
-                    <button
-                      onClick={() => setActiveTab('settings')}
-                      className="w-full flex items-center justify-between p-3 rounded-xl bg-[#F5F3F2] hover:bg-[#303033] hover:text-white transition group text-xs font-medium"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-[#B8202A] group-hover:text-white" />
-                        Configure WhatsApp Routing Number
-                      </span>
-                      <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            'Reset all products, brands, and categories to factory default data? Any custom products will be replaced.'
-                          )
-                        ) {
-                          resetToFactoryDefaults();
-                          reloadAll();
-                          showToast('Factory initial catalogue restored');
-                        }
-                      }}
-                      className="w-full flex items-center justify-between p-3 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 transition group text-xs font-medium border border-amber-200"
-                    >
-                      <span className="flex items-center gap-2">
-                        <RefreshCw className="w-4 h-4" />
-                        Restore Original Factory Sample Data
-                      </span>
-                    </button>
-                  </div>
+            {/* Quick Action Banner */}
+            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-lg shadow-red-600/20">
+              <div className="space-y-1">
+                <div className="text-xs uppercase tracking-wider text-red-200 font-bold">
+                  Quick Management
                 </div>
-
-                {/* Store Metadata Card */}
-                <div className="bg-[#FDFDFD] p-6 rounded-2xl border border-[#303033]/10 text-xs space-y-3">
-                  <div className="font-tech text-[10px] tracking-wider uppercase text-[#B8202A]">
-                    TIRUPATI SHOWROOM COORDINATES
-                  </div>
-                  <div className="font-medium text-[#303033]">
-                    {settings.storeInfo.name}
-                  </div>
-                  <p className="text-[#777271] leading-relaxed">
-                    {settings.storeInfo.fullAddress}
-                  </p>
-                  <div className="pt-2 border-t border-[#303033]/10 flex items-center justify-between">
-                    <span className="text-[#777271]">Live WhatsApp Route:</span>
-                    <span className="font-tech font-semibold text-[#B8202A]">
-                      {settings.customWhatsAppNumber}
-                    </span>
-                  </div>
-                </div>
+                <h2 className="text-xl sm:text-2xl font-bold">
+                  Need to add a new product or update prices?
+                </h2>
+                <p className="text-sm text-red-100 max-w-xl">
+                  Add products with 1 click. They immediately show up on your website's catalogue and search modal.
+                </p>
               </div>
 
-              {/* Right Column: Recent Inbound Inquiries Table */}
-              <div className="lg:col-span-8 bg-[#FDFDFD] p-6 rounded-2xl border border-[#303033]/10">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="font-editorial text-lg text-[#303033]">
-                      Recent Customer & Dealer Inquiries
-                    </h3>
-                    <p className="text-xs text-[#777271]">
-                      Real-time inquiries received via website forms and WhatsApp concierge
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('inquiries')}
-                    className="text-xs text-[#B8202A] font-semibold hover:underline"
-                  >
-                    View All ({inquiries.length}) →
-                  </button>
-                </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={openNewProductModal}
+                  className="px-5 py-3 rounded-xl bg-white text-red-600 text-sm font-bold shadow-md hover:bg-red-50 transition flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add New Product</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('inquiries')}
+                  className="px-5 py-3 rounded-xl bg-red-800 text-white text-sm font-semibold hover:bg-red-900 transition flex items-center gap-2"
+                >
+                  <Inbox className="w-4 h-4" />
+                  <span>Check Customer Leads</span>
+                </button>
+              </div>
+            </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-[#303033]/10 text-[#777271] font-tech uppercase text-[10px]">
-                        <th className="py-2.5">Date</th>
-                        <th className="py-2.5">Customer / Firm</th>
-                        <th className="py-2.5">Intent</th>
-                        <th className="py-2.5">Product / Requirement</th>
-                        <th className="py-2.5">Status</th>
-                        <th className="py-2.5 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#303033]/5">
-                      {inquiries.slice(0, 5).map((inq) => (
-                        <tr key={inq.id} className="hover:bg-[#F5F3F2]/50">
-                          <td className="py-3 text-[#777271] whitespace-nowrap font-tech text-[11px]">
-                            {new Date(inq.timestamp).toLocaleDateString('en-IN', {
-                              day: '2-digit',
-                              month: 'short',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </td>
-                          <td className="py-3 font-medium text-[#303033]">
-                            <div>{inq.customerName}</div>
-                            {inq.phone && (
-                              <div className="text-[11px] text-[#777271] font-tech">
-                                {inq.phone}
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-3">
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
-                                inq.type === 'wholesale'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : inq.type === 'warranty'
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-emerald-100 text-emerald-800'
-                              }`}
-                            >
-                              {inq.type}
-                            </span>
-                          </td>
-                          <td className="py-3 text-[#777271] max-w-[200px] truncate">
-                            {inq.productName || inq.quantity || inq.notes || 'General enquiry'}
-                          </td>
-                          <td className="py-3">
-                            <span
-                              className={`px-2 py-0.5 rounded-md text-[10px] font-medium capitalize ${
-                                inq.status === 'new'
-                                  ? 'bg-red-100 text-red-700 font-semibold'
-                                  : inq.status === 'contacted'
-                                  ? 'bg-amber-100 text-amber-700'
-                                  : 'bg-emerald-100 text-emerald-700'
-                              }`}
-                            >
-                              {inq.status}
-                            </span>
-                          </td>
-                          <td className="py-3 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              {inq.status !== 'resolved' && (
-                                <button
-                                  onClick={() =>
-                                    handleUpdateInquiryStatus(inq.id, 'resolved')
-                                  }
-                                  title="Mark as Resolved"
-                                  className="p-1 rounded-md hover:bg-emerald-100 text-emerald-700 transition"
-                                >
-                                  <Check className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                              <button
-                                onClick={() => handleDeleteInquiry(inq.id)}
-                                title="Delete Inquiry"
-                                className="p-1 rounded-md hover:bg-red-100 text-red-600 transition"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {/* Recent Leads Preview */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Recent Inbound Inquiries
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Direct inquiries from customers visiting your website
+                  </p>
                 </div>
+                <button
+                  onClick={() => setActiveTab('inquiries')}
+                  className="text-xs font-semibold text-red-600 hover:text-red-700 hover:underline flex items-center gap-1"
+                >
+                  <span>View All Leads ({inquiries.length})</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead>
+                    <tr className="text-slate-400 uppercase text-[11px] font-bold border-b border-slate-100">
+                      <th className="py-2.5">Date</th>
+                      <th className="py-2.5">Customer / Firm</th>
+                      <th className="py-2.5">Requirement</th>
+                      <th className="py-2.5">Type</th>
+                      <th className="py-2.5">Status</th>
+                      <th className="py-2.5 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {inquiries.slice(0, 5).map((inq) => (
+                      <tr key={inq.id} className="hover:bg-slate-50">
+                        <td className="py-3 text-slate-500 whitespace-nowrap text-xs">
+                          {new Date(inq.timestamp).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </td>
+                        <td className="py-3 font-semibold text-slate-800">
+                          <div>{inq.customerName}</div>
+                          {inq.phone && (
+                            <div className="text-xs font-normal text-slate-500">
+                              {inq.phone}
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3 text-slate-600 max-w-xs truncate">
+                          {inq.productName || inq.quantity || inq.notes || 'General enquiry'}
+                        </td>
+                        <td className="py-3">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${
+                              inq.type === 'wholesale'
+                                ? 'bg-blue-100 text-blue-800'
+                                : inq.type === 'warranty'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-emerald-100 text-emerald-800'
+                            }`}
+                          >
+                            {inq.type}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          <span
+                            className={`px-2 py-0.5 rounded-md text-[11px] font-semibold capitalize ${
+                              inq.status === 'new'
+                                ? 'bg-red-100 text-red-700'
+                                : inq.status === 'contacted'
+                                ? 'bg-amber-100 text-amber-700'
+                                : 'bg-emerald-100 text-emerald-700'
+                            }`}
+                          >
+                            {inq.status}
+                          </span>
+                        </td>
+                        <td className="py-3 text-right">
+                          <button
+                            onClick={() => setActiveTab('inquiries')}
+                            className="text-xs font-semibold text-slate-700 hover:text-red-600"
+                          >
+                            Manage →
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 2: PRODUCTS */}
+        {/* ========================================================= */}
+        {/* TAB 2: PRODUCTS MANAGEMENT                                 */}
+        {/* ========================================================= */}
         {activeTab === 'products' && (
-          <div className="py-8 space-y-6">
-            {/* Products Toolbar */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#FDFDFD] p-5 rounded-2xl border border-[#303033]/10">
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Search */}
-                <div className="relative min-w-[240px]">
-                  <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-[#777271]" />
+          <div className="space-y-6">
+            {/* Header + Add Product Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Products & Catalogue
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Add, edit, delete, or feature products across your website
+                </p>
+              </div>
+
+              <button
+                onClick={openNewProductModal}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-md shadow-red-600/20 transition"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add New Product</span>
+              </button>
+            </div>
+
+            {/* Filter and Search Bar */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3 flex-1">
+                <div className="relative min-w-[260px] flex-1 sm:flex-none">
+                  <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
                   <input
                     type="text"
                     value={prodSearch}
                     onChange={(e) => setProdSearch(e.target.value)}
-                    placeholder="Search by name, model..."
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
+                    placeholder="Search by product name, model..."
+                    className="w-full pl-10 pr-4 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
                   />
                 </div>
 
-                {/* Category Filter */}
                 <select
                   value={prodCategoryFilter}
                   onChange={(e) => setProdCategoryFilter(e.target.value)}
-                  className="px-3 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none"
+                  className="px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none"
                 >
-                  <option value="all">All Categories ({categories.length})</option>
+                  <option value="all">All Categories</option>
                   {categories.map((c) => (
                     <option key={c.slug} value={c.slug}>
                       {c.name}
@@ -762,13 +760,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                   ))}
                 </select>
 
-                {/* Brand Filter */}
                 <select
                   value={prodBrandFilter}
                   onChange={(e) => setProdBrandFilter(e.target.value)}
-                  className="px-3 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none"
+                  className="px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none"
                 >
-                  <option value="all">All Brands ({brands.length})</option>
+                  <option value="all">All Brands</option>
                   {brands.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.name}
@@ -783,194 +780,163 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                       setProdCategoryFilter('all');
                       setProdBrandFilter('all');
                     }}
-                    className="text-xs text-[#B8202A] hover:underline"
+                    className="text-xs font-semibold text-red-600 hover:underline"
                   >
-                    Clear filters
+                    Reset filters
                   </button>
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-[#777271] font-tech">
-                  Showing {filteredProducts.length} of {products.length} models
-                </span>
-                <button
-                  onClick={openNewProductModal}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#B8202A] text-white text-xs font-semibold hover:bg-[#961923] transition shadow-md shadow-[#B8202A]/20"
+              <div className="text-xs text-slate-500 font-medium">
+                Showing {filteredProducts.length} of {products.length} products
+              </div>
+            </div>
+
+            {/* Clean Products Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredProducts.map((prod) => (
+                <div
+                  key={prod.id}
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Product</span>
-                </button>
-              </div>
-            </div>
+                  <div>
+                    {/* Image Header with Featured Badge */}
+                    <div className="relative h-48 bg-slate-100 overflow-hidden">
+                      <img
+                        src={prod.primaryImage}
+                        alt={prod.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=400&q=80';
+                        }}
+                      />
+                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-bold text-slate-800 shadow-xs">
+                        {prod.brandName}
+                      </div>
 
-            {/* Products Table */}
-            <div className="bg-[#FDFDFD] rounded-2xl border border-[#303033]/10 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#F5F3F2]/60 border-b border-[#303033]/10">
-                    <tr className="text-[#777271] font-tech uppercase text-[10px]">
-                      <th className="py-3 px-4">Item</th>
-                      <th className="py-3 px-4">Model & Index</th>
-                      <th className="py-3 px-4">Brand</th>
-                      <th className="py-3 px-4">Category</th>
-                      <th className="py-3 px-4 text-center">Featured Showcase</th>
-                      <th className="py-3 px-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#303033]/5">
-                    {filteredProducts.map((prod) => (
-                      <tr key={prod.id} className="hover:bg-[#F5F3F2]/50 transition">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={prod.primaryImage}
-                              alt={prod.name}
-                              className="w-11 h-11 rounded-lg object-cover bg-neutral-100 border border-[#303033]/10"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src =
-                                  'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=300&q=80';
-                              }}
-                            />
-                            <div>
-                              <div className="font-semibold text-[#303033] line-clamp-1">
-                                {prod.name}
-                              </div>
-                              <div className="text-[11px] text-[#777271] line-clamp-1 max-w-[280px]">
-                                {prod.tagline}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="font-tech text-xs text-[#303033]">
-                            {prod.model}
-                          </div>
-                          <div className="text-[10px] text-[#777271] font-tech">
-                            {prod.indexCode}
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="font-medium text-[#303033]">
-                            {prod.brandName}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-tech bg-[#F5F3F2] text-[#303033]">
-                            {prod.categoryLabel}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <button
-                            onClick={() => handleToggleFeatured(prod.id)}
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition ${
-                              prod.featured
-                                ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                                : 'bg-neutral-100 text-[#777271] hover:bg-neutral-200'
-                            }`}
+                      <button
+                        onClick={() => handleToggleFeatured(prod.id)}
+                        className={`absolute top-3 right-3 px-2.5 py-1 rounded-md text-xs font-bold transition shadow-xs ${
+                          prod.featured
+                            ? 'bg-amber-400 text-slate-900'
+                            : 'bg-white/80 text-slate-600 hover:bg-white'
+                        }`}
+                        title="Click to toggle featured on homepage"
+                      >
+                        {prod.featured ? '★ Featured' : '☆ Not Featured'}
+                      </button>
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="p-5 space-y-2">
+                      <div className="text-xs font-mono font-medium text-slate-400">
+                        {prod.model} · {prod.categoryLabel}
+                      </div>
+                      <h3 className="text-base font-bold text-slate-900 leading-snug line-clamp-1">
+                        {prod.name}
+                      </h3>
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                        {prod.tagline || prod.editorialSummary}
+                      </p>
+
+                      <div className="pt-2 flex flex-wrap gap-1">
+                        {prod.keyHighlights.slice(0, 3).map((hl, hIdx) => (
+                          <span
+                            key={hIdx}
+                            className="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded"
                           >
-                            {prod.featured ? '★ Featured (Home)' : 'Standard'}
-                          </button>
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => {
-                                setEditingProduct(JSON.parse(JSON.stringify(prod)));
-                                setIsProductModalOpen(true);
-                              }}
-                              className="p-1.5 rounded-lg hover:bg-neutral-200 text-[#303033] transition"
-                              title="Edit Product"
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteProduct(prod.id, prod.name)}
-                              className="p-1.5 rounded-lg hover:bg-red-100 text-red-600 transition"
-                              title="Delete Product"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                            {hl}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
-              {filteredProducts.length === 0 && (
-                <div className="py-12 text-center text-xs text-[#777271]">
-                  No products found matching the criteria.
+                  {/* Card Actions Footer */}
+                  <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                    <button
+                      onClick={() => {
+                        setEditingProduct(JSON.parse(JSON.stringify(prod)));
+                        setIsProductModalOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-800 bg-white border border-slate-200 hover:bg-slate-100 transition shadow-2xs"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Edit Details</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteProduct(prod.id, prod.name)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 transition"
+                      title="Delete this product"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
+
+            {filteredProducts.length === 0 && (
+              <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
+                <Package className="w-10 h-10 mx-auto text-slate-300 mb-3" />
+                <div className="font-bold text-slate-800">No products match your search</div>
+                <div className="text-xs text-slate-400 mt-1">Try resetting your filters or search keywords</div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* TAB 3: CATEGORIES */}
+        {/* ========================================================= */}
+        {/* TAB 3: CATEGORIES                                          */}
+        {/* ========================================================= */}
         {activeTab === 'categories' && (
-          <div className="py-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-editorial text-2xl text-[#303033]">
-                  Hardware Taxonomy & Collections
-                </h2>
-                <p className="text-xs text-[#777271]">
-                  Categories control catalogue navigation filters and homepage editorial spotlights
-                </p>
-              </div>
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">
+                Categories & Collections
+              </h2>
+              <p className="text-sm text-slate-500">
+                Manage product collections displayed on your website
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categories.map((cat, idx) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {categories.map((cat) => (
                 <div
                   key={cat.slug}
-                  className="bg-[#FDFDFD] rounded-2xl border border-[#303033]/10 overflow-hidden flex flex-col justify-between"
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs flex flex-col justify-between"
                 >
-                  <div className="relative h-44 overflow-hidden bg-neutral-100">
+                  <div className="h-40 bg-slate-100 overflow-hidden">
                     <img
                       src={cat.image}
                       alt={cat.name}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute top-3 left-3 bg-[#303033]/80 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-white font-tech text-[10px]">
-                      {cat.index}
-                    </div>
                   </div>
                   <div className="p-5 flex-1 flex flex-col justify-between">
                     <div>
-                      <div className="font-tech text-[10px] uppercase text-[#B8202A] tracking-wider mb-1">
-                        {cat.technicalAnnotation}
+                      <div className="text-xs font-mono text-red-600 font-bold mb-1">
+                        INDEX // {cat.index}
                       </div>
-                      <h3 className="font-editorial text-xl text-[#303033] mb-1">
+                      <h3 className="text-base font-bold text-slate-900 mb-1">
                         {cat.name}
                       </h3>
-                      <p className="text-xs text-[#777271] leading-relaxed line-clamp-3 mb-3">
+                      <p className="text-xs text-slate-500 leading-relaxed line-clamp-3 mb-3">
                         {cat.subtitle}
                       </p>
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {cat.brandsIncluded.map((b) => (
-                          <span
-                            key={b}
-                            className="text-[10px] bg-[#F5F3F2] px-2 py-0.5 rounded-md text-[#303033]"
-                          >
-                            {b}
-                          </span>
-                        ))}
-                      </div>
                     </div>
 
-                    <div className="pt-3 border-t border-[#303033]/10 flex items-center justify-between">
-                      <span className="text-[11px] font-tech text-[#777271]">
-                        Slug: /{cat.slug}
-                      </span>
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-xs font-mono text-slate-400">/{cat.slug}</span>
                       <button
                         onClick={() => {
                           setEditingCategory(JSON.parse(JSON.stringify(cat)));
                           setIsCategoryModalOpen(true);
                         }}
-                        className="inline-flex items-center gap-1 text-xs text-[#B8202A] font-semibold hover:underline"
+                        className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                         <span>Edit Category</span>
@@ -983,39 +949,39 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
           </div>
         )}
 
-        {/* TAB 4: BRAND PROFILES */}
+        {/* ========================================================= */}
+        {/* TAB 4: BRANDS                                              */}
+        {/* ========================================================= */}
         {activeTab === 'brands' && (
-          <div className="py-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-editorial text-2xl text-[#303033]">
-                  Authorized Brand Profiles
-                </h2>
-                <p className="text-xs text-[#777271]">
-                  Official OEM partners represented by Sri Gajender Traders across Tirupati & AP
-                </p>
-              </div>
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">
+                Authorized Brand Profiles
+              </h2>
+              <p className="text-sm text-slate-500">
+                Edit brand partner headlines and capability highlights
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {brands.map((b) => (
                 <div
                   key={b.id}
-                  className="bg-[#FDFDFD] p-6 rounded-2xl border border-[#303033]/10 space-y-4"
+                  className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center font-editorial text-base font-bold text-white shadow-sm"
+                        className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-base text-white shadow-sm"
                         style={{ backgroundColor: b.accentTone || '#B8202A' }}
                       >
                         {b.monogram}
                       </div>
                       <div>
-                        <div className="text-[10px] font-tech text-[#777271]">
+                        <div className="text-xs font-mono text-slate-400">
                           {b.index}
                         </div>
-                        <h3 className="font-editorial text-xl text-[#303033]">
+                        <h3 className="text-lg font-bold text-slate-900">
                           {b.name}
                         </h3>
                       </div>
@@ -1026,7 +992,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                         setEditingBrand(JSON.parse(JSON.stringify(b)));
                         setIsBrandModalOpen(true);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F5F3F2] hover:bg-[#303033] hover:text-white transition text-xs"
+                      className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 flex items-center gap-1.5 transition"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                       <span>Edit</span>
@@ -1034,23 +1000,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                   </div>
 
                   <div>
-                    <div className="text-[11px] font-semibold text-[#B8202A] mb-1">
+                    <div className="text-xs font-semibold text-red-600 mb-1">
                       {b.editorialHeadline}
                     </div>
-                    <p className="text-xs text-[#777271] leading-relaxed line-clamp-3">
+                    <p className="text-xs text-slate-500 leading-relaxed">
                       {b.description}
                     </p>
                   </div>
 
-                  <div className="space-y-1.5 pt-2 border-t border-[#303033]/10">
-                    <div className="text-[10px] font-tech uppercase text-[#777271]">
-                      Key Lineups Carried
+                  <div className="pt-2 border-t border-slate-100 space-y-1">
+                    <div className="text-[11px] font-bold uppercase text-slate-400">
+                      Product Lineups Carried
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {b.signatureCapabilities.map((sig, sIdx) => (
                         <span
                           key={sIdx}
-                          className="text-[11px] bg-[#F5F3F2] px-2.5 py-1 rounded-md text-[#303033]"
+                          className="text-xs bg-slate-50 border border-slate-200 px-2.5 py-0.5 rounded text-slate-700"
                         >
                           {sig}
                         </span>
@@ -1063,21 +1029,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
           </div>
         )}
 
-        {/* TAB 5: INBOUND INQUIRIES */}
+        {/* ========================================================= */}
+        {/* TAB 5: INBOUND INQUIRIES                                   */}
+        {/* ========================================================= */}
         {activeTab === 'inquiries' && (
-          <div className="py-8 space-y-6">
+          <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="font-editorial text-2xl text-[#303033]">
-                  Customer & Commercial Enquiries
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Customer & Dealer Inquiries
                 </h2>
-                <p className="text-xs text-[#777271]">
+                <p className="text-sm text-slate-500">
                   Track quote requests, wholesale dealer leads, and warranty support queries
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[#777271]">
+                <span className="text-xs font-semibold bg-slate-200 px-3 py-1 rounded-full text-slate-700">
                   Total: {inquiries.length} leads
                 </span>
               </div>
@@ -1087,19 +1055,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
               {inquiries.map((inq) => (
                 <div
                   key={inq.id}
-                  className={`p-5 rounded-2xl border transition-all ${
+                  className={`bg-white p-5 rounded-2xl border shadow-xs transition ${
                     inq.status === 'new'
-                      ? 'bg-[#FDFDFD] border-[#B8202A]/40 shadow-sm'
+                      ? 'border-red-400 ring-2 ring-red-100'
                       : inq.status === 'contacted'
-                      ? 'bg-[#FDFDFD] border-amber-300'
-                      : 'bg-[#FDFDFD]/70 border-[#303033]/10 opacity-75'
+                      ? 'border-amber-300'
+                      : 'border-slate-200 opacity-80'
                   }`}
                 >
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2.5 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
                             inq.type === 'wholesale'
                               ? 'bg-blue-100 text-blue-800'
                               : inq.type === 'warranty'
@@ -1107,83 +1075,83 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                               : 'bg-emerald-100 text-emerald-800'
                           }`}
                         >
-                          {inq.type} Request
+                          {inq.type}
                         </span>
 
-                        <span className="font-tech text-xs text-[#777271]">
+                        <span className="text-xs text-slate-400 font-mono">
                           {new Date(inq.timestamp).toLocaleString('en-IN')}
                         </span>
 
                         <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-tech font-bold uppercase ${
+                          className={`px-2 py-0.5 rounded-md text-xs font-bold capitalize ${
                             inq.status === 'new'
-                              ? 'bg-red-600 text-white animate-pulse'
+                              ? 'bg-red-600 text-white'
                               : inq.status === 'contacted'
                               ? 'bg-amber-500 text-white'
                               : 'bg-emerald-600 text-white'
                           }`}
                         >
-                          Status: {inq.status}
+                          {inq.status}
                         </span>
                       </div>
 
-                      <h3 className="font-editorial text-lg text-[#303033]">
+                      <h3 className="text-base font-bold text-slate-900">
                         {inq.customerName}{' '}
                         {inq.phone && (
-                          <span className="font-sans font-normal text-xs text-[#777271]">
+                          <span className="font-normal text-xs text-slate-500">
                             · {inq.phone}
                           </span>
                         )}
                       </h3>
 
                       {inq.productName && (
-                        <div className="text-xs font-medium text-[#B8202A]">
+                        <div className="text-xs font-bold text-red-600">
                           Product: {inq.productName}
                         </div>
                       )}
 
                       {inq.quantity && (
-                        <div className="text-xs text-[#303033]">
-                          <span className="text-[#777271]">Volume:</span> {inq.quantity}
+                        <div className="text-xs text-slate-700">
+                          <span className="font-bold">Quantity / Volume:</span> {inq.quantity}
                         </div>
                       )}
 
                       {inq.notes && (
-                        <p className="text-xs text-[#777271] bg-[#F5F3F2] p-3 rounded-xl border border-[#303033]/5">
+                        <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
                           "{inq.notes}"
                         </p>
                       )}
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Action Controls */}
                     <div className="flex md:flex-col items-center md:items-end gap-2 shrink-0">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
                         <button
                           onClick={() => handleUpdateInquiryStatus(inq.id, 'new')}
-                          className={`px-2.5 py-1 text-[11px] rounded-lg transition ${
+                          className={`px-2.5 py-1 text-xs rounded-lg font-bold transition ${
                             inq.status === 'new'
-                              ? 'bg-red-100 text-red-800 font-bold'
-                              : 'bg-[#F5F3F2] text-[#777271] hover:bg-neutral-200'
+                              ? 'bg-white text-red-600 shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900'
                           }`}
                         >
                           New
                         </button>
                         <button
                           onClick={() => handleUpdateInquiryStatus(inq.id, 'contacted')}
-                          className={`px-2.5 py-1 text-[11px] rounded-lg transition ${
+                          className={`px-2.5 py-1 text-xs rounded-lg font-bold transition ${
                             inq.status === 'contacted'
-                              ? 'bg-amber-100 text-amber-800 font-bold'
-                              : 'bg-[#F5F3F2] text-[#777271] hover:bg-neutral-200'
+                              ? 'bg-white text-amber-600 shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900'
                           }`}
                         >
                           Contacted
                         </button>
                         <button
                           onClick={() => handleUpdateInquiryStatus(inq.id, 'resolved')}
-                          className={`px-2.5 py-1 text-[11px] rounded-lg transition ${
+                          className={`px-2.5 py-1 text-xs rounded-lg font-bold transition ${
                             inq.status === 'resolved'
-                              ? 'bg-emerald-100 text-emerald-800 font-bold'
-                              : 'bg-[#F5F3F2] text-[#777271] hover:bg-neutral-200'
+                              ? 'bg-white text-emerald-600 shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900'
                           }`}
                         >
                           Resolved
@@ -1195,10 +1163,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                           href={`https://wa.me/${inq.phone.replace(/[^0-9]/g, '')}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs hover:bg-emerald-700 transition font-medium"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition shadow-xs"
                         >
-                          <Phone className="w-3 h-3" />
-                          <span>WhatsApp Lead</span>
+                          <Phone className="w-3.5 h-3.5" />
+                          <span>Chat on WhatsApp</span>
                         </a>
                       )}
 
@@ -1214,196 +1182,196 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
               ))}
 
               {inquiries.length === 0 && (
-                <div className="bg-[#FDFDFD] p-12 text-center rounded-2xl border border-[#303033]/10 text-xs text-[#777271]">
-                  No inquiries recorded yet. Inquiries will appear automatically when customers submit enquiry forms.
+                <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
+                  <Inbox className="w-10 h-10 mx-auto text-slate-300 mb-3" />
+                  <div className="font-bold text-slate-800">No inquiries yet</div>
+                  <div className="text-xs text-slate-400 mt-1">
+                    When visitors submit the WhatsApp Concierge modal, they will show up here.
+                  </div>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* TAB 6: SETTINGS & STORE TIMINGS */}
+        {/* ========================================================= */}
+        {/* TAB 6: SETTINGS                                            */}
+        {/* ========================================================= */}
         {activeTab === 'settings' && (
-          <div className="py-8 space-y-8">
-            <div className="bg-[#FDFDFD] p-6 sm:p-8 rounded-2xl border border-[#303033]/10 max-w-3xl space-y-6">
+          <div className="space-y-6 max-w-3xl">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">
+                Store Settings & Info
+              </h2>
+              <p className="text-sm text-slate-500">
+                Configure your WhatsApp phone number, store address, and global banner
+              </p>
+            </div>
+
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
               <div>
-                <h2 className="font-editorial text-2xl text-[#303033]">
-                  Store & System Configuration
-                </h2>
-                <p className="text-xs text-[#777271]">
-                  Manage store contact details, WhatsApp routing number, hours, and announcements
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                  Store Display Name
+                </label>
+                <input
+                  type="text"
+                  value={settings.storeInfo.name}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      storeInfo: { ...settings.storeInfo, name: e.target.value },
+                    })
+                  }
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                  WhatsApp Contact Phone Number (with Country Code)
+                </label>
+                <input
+                  type="text"
+                  value={settings.customWhatsAppNumber}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      customWhatsAppNumber: e.target.value,
+                    })
+                  }
+                  placeholder="+91 94401 55920"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 font-mono"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  All customer clicks on "Send WhatsApp Enquiry" will route directly to this WhatsApp number.
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1.5">
-                    Store Flagship Title
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.storeInfo.name}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        storeInfo: { ...settings.storeInfo, name: e.target.value },
-                      })
-                    }
-                    className="w-full px-4 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                  Physical Store Address (Nehru Nagar, Tirupati)
+                </label>
+                <textarea
+                  rows={2}
+                  value={settings.storeInfo.fullAddress}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      storeInfo: {
+                        ...settings.storeInfo,
+                        fullAddress: e.target.value,
+                      },
+                    })
+                  }
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1.5">
-                    WhatsApp Routing Target Number (with Country Code)
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.customWhatsAppNumber}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        customWhatsAppNumber: e.target.value,
-                      })
-                    }
-                    placeholder="+91 94401 55920"
-                    className="w-full px-4 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
-                  />
-                  <p className="text-[11px] text-[#777271] mt-1">
-                    All website "Enquire via WhatsApp" and Concierge modal links will automatically route to this phone number.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1.5">
-                    Physical Showroom Address
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={settings.storeInfo.fullAddress}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        storeInfo: {
-                          ...settings.storeInfo,
-                          fullAddress: e.target.value,
-                        },
-                      })
-                    }
-                    className="w-full px-4 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1.5">
-                    Instagram Handle / URL
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.storeInfo.instagramUrl}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        storeInfo: {
-                          ...settings.storeInfo,
-                          instagramUrl: e.target.value,
-                        },
-                      })
-                    }
-                    className="w-full px-4 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
-                  />
-                </div>
-
-                {/* Announcement Banner Toggle */}
-                <div className="pt-4 border-t border-[#303033]/10 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold text-xs text-[#303033]">
-                        Top Announcement Ribbon
-                      </div>
-                      <div className="text-[11px] text-[#777271]">
-                        Show a prominent announcement bar at the top of all pages
-                      </div>
+              {/* Announcement Banner */}
+              <div className="pt-4 border-t border-slate-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-sm text-slate-900">
+                      Website Announcement Ribbon
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={settings.enableAnnouncement}
-                      onChange={(e) =>
-                        setSettings({
-                          ...settings,
-                          enableAnnouncement: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4 accent-[#B8202A]"
-                    />
+                    <div className="text-xs text-slate-500">
+                      Show an announcement at the top of the storefront
+                    </div>
                   </div>
-
-                  {settings.enableAnnouncement && (
-                    <input
-                      type="text"
-                      value={settings.announcementText}
-                      onChange={(e) =>
-                        setSettings({
-                          ...settings,
-                          announcementText: e.target.value,
-                        })
-                      }
-                      placeholder="e.g. Special festive pricing on audio & optical cameras!"
-                      className="w-full px-4 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
-                    />
-                  )}
+                  <input
+                    type="checkbox"
+                    checked={settings.enableAnnouncement}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        enableAnnouncement: e.target.checked,
+                      })
+                    }
+                    className="w-5 h-5 accent-red-600 cursor-pointer"
+                  />
                 </div>
 
-                <div className="pt-4">
-                  <button
-                    onClick={() => {
-                      saveStoredSettings(settings);
-                      showToast('Settings saved successfully');
-                    }}
-                    className="px-6 py-2.5 rounded-xl bg-[#B8202A] text-white text-xs font-semibold hover:bg-[#961923] transition shadow-md shadow-[#B8202A]/20"
-                  >
-                    Save Changes
-                  </button>
-                </div>
+                {settings.enableAnnouncement && (
+                  <input
+                    type="text"
+                    value={settings.announcementText}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        announcementText: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. Special festive discounts across boAt & Portronics this week!"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                )}
+              </div>
+
+              <div className="pt-4 flex items-center justify-between">
+                <button
+                  onClick={() => {
+                    saveStoredSettings(settings);
+                    showToast('Settings saved successfully');
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-md shadow-red-600/20 transition"
+                >
+                  Save Changes
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Reset all demo data back to initial factory setup?')) {
+                      resetToFactoryDefaults();
+                      reloadAll();
+                      showToast('Store reset to factory presets');
+                    }
+                  }}
+                  className="text-xs font-semibold text-slate-400 hover:text-red-600 transition"
+                >
+                  Restore Factory Defaults
+                </button>
               </div>
             </div>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* ===================== PRODUCT EDIT MODAL ===================== */}
+      {/* ========================================================= */}
+      {/* PRODUCT EDIT / ADD MODAL                                  */}
+      {/* ========================================================= */}
       <AnimatePresence>
         {isProductModalOpen && editingProduct && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-3xl my-8 bg-[#FDFDFD] rounded-3xl border border-[#303033]/15 p-6 sm:p-8 max-h-[90vh] overflow-y-auto studio-shadow-soft"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-[#303033]/10 mb-6">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
                 <div>
-                  <div className="font-tech text-[10px] uppercase text-[#B8202A] tracking-wider">
-                    CATALOGUE MODEL EDITOR
-                  </div>
-                  <h2 className="font-editorial text-2xl text-[#303033]">
+                  <h3 className="text-xl font-bold text-slate-900">
                     {products.some((p) => p.id === editingProduct.id)
-                      ? `Edit: ${editingProduct.name}`
+                      ? `Edit Product: ${editingProduct.name}`
                       : 'Add New Hardware Model'}
-                  </h2>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Fill in product details to show in your store catalogue
+                  </p>
                 </div>
                 <button
                   onClick={() => setIsProductModalOpen(false)}
-                  className="p-2 rounded-full hover:bg-neutral-100 text-[#777271]"
+                  className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSaveProduct} className="space-y-5">
+              <form onSubmit={handleSaveProduct} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
+                    <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
                       Product Name *
                     </label>
                     <input
@@ -1414,13 +1382,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                         setEditingProduct({ ...editingProduct, name: e.target.value })
                       }
                       placeholder="e.g. boAt Nirvana Ion ANC"
-                      className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
+                      className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                      Model Code *
+                    <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                      Model Number *
                     </label>
                     <input
                       type="text"
@@ -1430,15 +1398,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                         setEditingProduct({ ...editingProduct, model: e.target.value })
                       }
                       placeholder="e.g. Nirvana Ion ANC"
-                      className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
+                      className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                      Brand Partner
+                    <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                      Brand
                     </label>
                     <select
                       value={editingProduct.brandId}
@@ -1451,7 +1419,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                           brandName: bObj ? bObj.name : bId,
                         });
                       }}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none"
+                      className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none"
                     >
                       {brands.map((b) => (
                         <option key={b.id} value={b.id}>
@@ -1463,8 +1431,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                      Category Collection
+                    <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                      Category
                     </label>
                     <select
                       value={editingProduct.category}
@@ -1477,7 +1445,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                           categoryLabel: cObj ? cObj.name : catSlug,
                         });
                       }}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none"
+                      className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none"
                     >
                       {categories.map((c) => (
                         <option key={c.slug} value={c.slug}>
@@ -1489,8 +1457,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                    Short Tagline
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                    Tagline (Short Summary)
                   </label>
                   <input
                     type="text"
@@ -1498,14 +1466,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                     onChange={(e) =>
                       setEditingProduct({ ...editingProduct, tagline: e.target.value })
                     }
-                    placeholder="e.g. Up to 32dB Active Noise Cancellation with 120-hour total playback."
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
+                    placeholder="e.g. 120-hour playback with up to 32dB active noise cancellation."
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                    Editorial Summary / Description
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                    Full Description
                   </label>
                   <textarea
                     rows={3}
@@ -1516,15 +1484,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                         editorialSummary: e.target.value,
                       })
                     }
-                    placeholder="Describe craftsmanship, acoustic or optical specifications, durability..."
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
+                    placeholder="Describe build quality, audio drivers, battery, warranty..."
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                      Primary Image URL
+                    <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                      Image URL
                     </label>
                     <input
                       type="text"
@@ -1535,57 +1503,37 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                           primaryImage: e.target.value,
                         })
                       }
-                      placeholder="https://images.unsplash.com/..."
-                      className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
+                      placeholder="https://..."
+                      className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                      Secondary Image URL
+                    <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                      Key Highlights (comma-separated)
                     </label>
                     <input
                       type="text"
-                      value={editingProduct.secondaryImage}
+                      value={editingProduct.keyHighlights.join(', ')}
                       onChange={(e) =>
                         setEditingProduct({
                           ...editingProduct,
-                          secondaryImage: e.target.value,
+                          keyHighlights: e.target.value
+                            .split(',')
+                            .map((s) => s.trim())
+                            .filter(Boolean),
                         })
                       }
-                      placeholder="https://images.unsplash.com/..."
-                      className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
+                      placeholder="e.g. 120H Battery, Quad Mic ENC, 45ms Latency"
+                      className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none"
                     />
                   </div>
                 </div>
 
-                {/* Key Highlights */}
-                <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                    Key Highlights (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={editingProduct.keyHighlights.join(', ')}
-                    onChange={(e) =>
-                      setEditingProduct({
-                        ...editingProduct,
-                        keyHighlights: e.target.value
-                          .split(',')
-                          .map((s) => s.trim())
-                          .filter(Boolean),
-                      })
-                    }
-                    placeholder="e.g. 100H Battery, Quad Mic ENC, 45ms Latency, Type-C"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10 focus:outline-none focus:border-[#B8202A]"
-                  />
-                </div>
-
-                {/* Featured Switch */}
                 <div className="flex items-center gap-3 pt-2">
                   <input
                     type="checkbox"
-                    id="featuredCheckbox"
+                    id="featuredModalCheckbox"
                     checked={!!editingProduct.featured}
                     onChange={(e) =>
                       setEditingProduct({
@@ -1593,26 +1541,29 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                         featured: e.target.checked,
                       })
                     }
-                    className="w-4 h-4 accent-[#B8202A]"
+                    className="w-5 h-5 accent-red-600 cursor-pointer"
                   />
-                  <label htmlFor="featuredCheckbox" className="text-xs text-[#303033] font-medium cursor-pointer">
-                    Feature in Homepage Showcase Ribbon (Section 03)
+                  <label
+                    htmlFor="featuredModalCheckbox"
+                    className="text-sm font-semibold text-slate-700 cursor-pointer"
+                  >
+                    Feature on Homepage Showcase (Section 03)
                   </label>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-6 border-t border-[#303033]/10">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setIsProductModalOpen(false)}
-                    className="px-5 py-2.5 rounded-xl bg-[#F5F3F2] text-[#303033] text-xs font-medium hover:bg-neutral-200 transition"
+                    className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-[#B8202A] text-white text-xs font-semibold hover:bg-[#961923] transition shadow-md shadow-[#B8202A]/20"
+                    className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold shadow-md shadow-red-600/20"
                   >
-                    Save Hardware Model
+                    Save Product
                   </button>
                 </div>
               </form>
@@ -1621,23 +1572,25 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
         )}
       </AnimatePresence>
 
-      {/* ===================== CATEGORY EDIT MODAL ===================== */}
+      {/* ========================================================= */}
+      {/* CATEGORY EDIT MODAL                                       */}
+      {/* ========================================================= */}
       <AnimatePresence>
         {isCategoryModalOpen && editingCategory && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-xl bg-[#FDFDFD] rounded-3xl border border-[#303033]/15 p-6 sm:p-8 studio-shadow-soft"
+              className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-6 sm:p-8"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-[#303033]/10 mb-6">
-                <h2 className="font-editorial text-2xl text-[#303033]">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <h3 className="text-lg font-bold text-slate-900">
                   Edit Category: {editingCategory.name}
-                </h2>
+                </h3>
                 <button
                   onClick={() => setIsCategoryModalOpen(false)}
-                  className="p-2 rounded-full hover:bg-neutral-100 text-[#777271]"
+                  className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1645,8 +1598,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                    Category Title
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                    Category Name
                   </label>
                   <input
                     type="text"
@@ -1654,29 +1607,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                     onChange={(e) =>
                       setEditingCategory({ ...editingCategory, name: e.target.value })
                     }
-                    className="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10"
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                    Editorial Title
-                  </label>
-                  <input
-                    type="text"
-                    value={editingCategory.editorialTitle}
-                    onChange={(e) =>
-                      setEditingCategory({
-                        ...editingCategory,
-                        editorialTitle: e.target.value,
-                      })
-                    }
-                    className="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
                     Subtitle / Summary
                   </label>
                   <textarea
@@ -1688,37 +1624,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                         subtitle: e.target.value,
                       })
                     }
-                    className="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10"
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                    Technical Annotation
-                  </label>
-                  <input
-                    type="text"
-                    value={editingCategory.technicalAnnotation}
-                    onChange={(e) =>
-                      setEditingCategory({
-                        ...editingCategory,
-                        technicalAnnotation: e.target.value,
-                      })
-                    }
-                    className="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#303033]/10">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                   <button
-                    type="button"
                     onClick={() => setIsCategoryModalOpen(false)}
-                    className="px-5 py-2 text-xs rounded-xl bg-[#F5F3F2] text-[#303033]"
+                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
                   >
                     Cancel
                   </button>
                   <button
-                    type="button"
                     onClick={() => {
                       const updated = categories.map((c) =>
                         c.slug === editingCategory.slug ? editingCategory : c
@@ -1728,7 +1645,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                       setIsCategoryModalOpen(false);
                       showToast('Category updated');
                     }}
-                    className="px-6 py-2 text-xs rounded-xl bg-[#B8202A] text-white font-semibold"
+                    className="px-5 py-2 rounded-xl bg-red-600 text-white text-sm font-bold"
                   >
                     Save Category
                   </button>
@@ -1739,23 +1656,25 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
         )}
       </AnimatePresence>
 
-      {/* ===================== BRAND EDIT MODAL ===================== */}
+      {/* ========================================================= */}
+      {/* BRAND EDIT MODAL                                          */}
+      {/* ========================================================= */}
       <AnimatePresence>
         {isBrandModalOpen && editingBrand && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-xl bg-[#FDFDFD] rounded-3xl border border-[#303033]/15 p-6 sm:p-8 studio-shadow-soft"
+              className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-6 sm:p-8"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-[#303033]/10 mb-6">
-                <h2 className="font-editorial text-2xl text-[#303033]">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <h3 className="text-lg font-bold text-slate-900">
                   Edit Brand: {editingBrand.name}
-                </h2>
+                </h3>
                 <button
                   onClick={() => setIsBrandModalOpen(false)}
-                  className="p-2 rounded-full hover:bg-neutral-100 text-[#777271]"
+                  className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1763,8 +1682,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                    Editorial Headline
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                    Headline
                   </label>
                   <input
                     type="text"
@@ -1775,12 +1694,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                         editorialHeadline: e.target.value,
                       })
                     }
-                    className="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10"
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
                     Brand Description
                   </label>
                   <textarea
@@ -1792,13 +1711,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                         description: e.target.value,
                       })
                     }
-                    className="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10"
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-tech uppercase text-[#777271] mb-1">
-                    Signature Capabilities (comma separated)
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">
+                    Signature Lineups (comma separated)
                   </label>
                   <input
                     type="text"
@@ -1812,20 +1731,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                           .filter(Boolean),
                       })
                     }
-                    className="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F5F3F2] border border-[#303033]/10"
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#303033]/10">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                   <button
-                    type="button"
                     onClick={() => setIsBrandModalOpen(false)}
-                    className="px-5 py-2 text-xs rounded-xl bg-[#F5F3F2] text-[#303033]"
+                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
                   >
                     Cancel
                   </button>
                   <button
-                    type="button"
                     onClick={() => {
                       const updated = brands.map((b) =>
                         b.id === editingBrand.id ? editingBrand : b
@@ -1835,9 +1752,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
                       setIsBrandModalOpen(false);
                       showToast('Brand profile updated');
                     }}
-                    className="px-6 py-2 text-xs rounded-xl bg-[#B8202A] text-white font-semibold"
+                    className="px-5 py-2 rounded-xl bg-red-600 text-white text-sm font-bold"
                   >
-                    Save Brand Profile
+                    Save Brand
                   </button>
                 </div>
               </div>
