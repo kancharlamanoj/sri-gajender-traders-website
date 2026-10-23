@@ -172,7 +172,13 @@ export function getStoredSettings(): AdminSettings {
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(defaults));
       return defaults;
     }
-    return { ...defaults, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    // Auto-migrate legacy demo number to official contact number
+    if (parsed.customWhatsAppNumber && parsed.customWhatsAppNumber.includes('94401')) {
+      parsed.customWhatsAppNumber = '+91 8179106524';
+      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(parsed));
+    }
+    return { ...defaults, ...parsed };
   } catch {
     return defaults;
   }

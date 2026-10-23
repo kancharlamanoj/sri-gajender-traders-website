@@ -219,8 +219,12 @@ export function buildWhatsAppEnquiryUrl(message: string, customPhone?: string): 
       // ignore
     }
   }
+  // Hardcoded verified store default: 8179106524
+  if (!targetNumber) {
+    targetNumber = '918179106524';
+  }
   const encoded = encodeURIComponent(message);
-  return targetNumber ? `https://wa.me/${targetNumber}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+  return `https://wa.me/${targetNumber}?text=${encoded}`;
 }
 
 export function formatProductWhatsAppMessage(product: ProductItem, quantityNote?: string): string {
