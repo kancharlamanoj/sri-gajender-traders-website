@@ -357,7 +357,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
   // AUTHENTICATED ADMIN PANEL: Premium Clean Dashboard UI
   // -------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col md:flex-row">
+    <div className="h-screen w-full bg-slate-50 text-slate-800 font-sans flex flex-col md:flex-row overflow-hidden">
       {/* Toast Popup Notification */}
       <AnimatePresence>
         {toastMessage && (
@@ -374,9 +374,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
       </AnimatePresence>
 
       {/* ========================================================= */}
-      {/* LEFT VERTICAL SIDEBAR                                     */}
+      {/* LEFT VERTICAL SIDEBAR: CONSTANT & FIXED                   */}
       {/* ========================================================= */}
-      <aside className="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 md:h-screen md:sticky md:top-0 z-40">
+      <aside className="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 h-auto md:h-screen z-40 select-none">
         {/* Brand / Logo Top */}
         <div className="p-5 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -497,11 +497,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
       </aside>
 
       {/* ========================================================= */}
-      {/* RIGHT SIDE MAIN WORKSPACE                                 */}
+      {/* RIGHT SIDE MAIN WORKSPACE: INDEPENDENT SCROLL             */}
       {/* ========================================================= */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {/* Top Header Strip in Content Area */}
-        <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* Top Header Strip in Content Area: Fixed */}
+        <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0 z-30 shadow-xs">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
               Section
@@ -528,8 +528,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* MAIN CONTENT AREA */}
-        <main className="p-6 sm:p-8 flex-1">
+        {/* MAIN CONTENT AREA: ONLY THIS SCROLLS */}
+        <main className="p-6 sm:p-8 flex-1 overflow-y-auto">
         {/* ========================================================= */}
         {/* TAB 1: DASHBOARD OVERVIEW                                  */}
         {/* ========================================================= */}

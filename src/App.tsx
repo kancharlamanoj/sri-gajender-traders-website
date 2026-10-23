@@ -180,13 +180,21 @@ export default function App() {
   const activeProduct =
     PRODUCTS.find((p) => p.id === route.productId) || PRODUCTS[0];
 
+  const isAdminView = route.page === 'admin';
+
   return (
-    <div className="relative min-h-screen bg-[#FDFDFD] text-[#303033] selection:bg-[#B8202A] selection:text-[#FDFDFD] overflow-x-clip">
+    <div
+      className={`relative ${
+        isAdminView ? 'h-screen overflow-hidden' : 'min-h-screen overflow-x-clip'
+      } bg-[#FDFDFD] text-[#303033] selection:bg-[#B8202A] selection:text-[#FDFDFD]`}
+    >
       {/* Subtle Print Materiality Grain */}
-      <div
-        aria-hidden="true"
-        className="luxury-grain pointer-events-none fixed inset-0 z-[50] opacity-[0.032]"
-      />
+      {!isAdminView && (
+        <div
+          aria-hidden="true"
+          className="luxury-grain pointer-events-none fixed inset-0 z-[50] opacity-[0.032]"
+        />
+      )}
 
       <ScrollProgressBar />
       <LuxuryDesktopCursor />
